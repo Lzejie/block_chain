@@ -40,7 +40,7 @@ def add_data():
 # 这里的例子是每次只挖最新的一条数据
 @app.route('/mine')
 @taker
-def add_block():
+def mine():
     global queued_data
     # data = request.args.get('data')
     # assert data, u'请传入数据'.encode('utf8')
