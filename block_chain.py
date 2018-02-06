@@ -9,12 +9,12 @@ from taker import taker
 app = Flask('block_chain')
 app.config['JSON_AS_ASCII'] = False
 
-# 当前服务的链
+# 当前链
 chain = []
-# 待插入的数据
+# 待插入区块链的数据
 queued_data = []
 
-# 区块链集合，其他区块链地址
+# 区块链集合，其他区块链节点地址
 chain_set = set()
 
 # 添加创世区块
@@ -70,10 +70,13 @@ def valid_chain(chain):
 
     return True
 
-# 获取所有节点的区块数据，并校验
+# 区块链共识部分
+# 这个地方就是用来解决区块链冲突的问题
+# 就是在所有节点里面找一个最长的合法链
 @app.route('/sync_chain')
 @taker
 def sync_chain():
+    # 获取所有节点的区块数据，并校验
     global chain
     for node in chain_set:
         node_data = requests.get('http://%s/chain'%node).json()['data']
@@ -99,11 +102,11 @@ def regest_node():
     node_url = request.args.get('url', '')
 
     # TODO:验证url合法性
+    assert node_url, u'请传入合法的url地址'.encode('utf8')
 
     # 添加区块链节点
     chain_set.add(node_url)
-
     return u'节点注册成功'.encode('utf8')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(threaded=True)

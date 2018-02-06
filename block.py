@@ -1,7 +1,6 @@
 # coding:utf8
 
 import time
-import json
 import hashlib
 from uuid import uuid1 as get_id
 
@@ -12,7 +11,7 @@ class Block(object):
         # 生成时间戳
         self.time = str(time.time())
         # 需要保存的数据，必须要可以hash
-        self.data = ''
+        self.data = data
         # 计算工作量证明
         self.proof = 0
         # 上一个节点的hash
@@ -33,7 +32,10 @@ class Block(object):
     @staticmethod
     def is_valid(hash):
         assert isinstance(hash, basestring), u'请传入字符串'.encode('utf8')
-        return hash.startswith('000000')
+        # 这里的规则是hash值必须以0000开头
+        # 在比特币的算法中，这个规则是会变化的，貌似是每产生2016个区块调整一次
+        # 如果发现平均每个区块的产生时间少于十分钟，就会增大难度，大于十分钟则减小难度
+        return hash.startswith('0000')
 
     # 挖矿
     def mine(self):
@@ -51,10 +53,9 @@ class Block(object):
         }
         return ret
 
-    # 根据字符串还原区块
+    # 根据数据还原区块
     @staticmethod
     def restore(data):
-        # data = json.loads(str)
         block = Block(data=data['data'], pre_hash=data['pre_hash'])
         block.id = data['id']
         block.time = data['time']
